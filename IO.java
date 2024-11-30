@@ -19,12 +19,13 @@ public class IO {
             Tarefas_ctl ctlTarefas = new Tarefas_ctl(arqTarefas, arqCategorias, arqRotulos);
             Rotulos_ctl ctlRotulos = new Rotulos_ctl(arqRotulos, arqTarefas);
 
+            Scanner scanner = new Scanner(System.in, "UTF-8");
+
             MenuCategorias menuCategorias = new MenuCategorias(ctlCategorias, ctlTarefas);
             MenuTarefas menuTarefas = new MenuTarefas(ctlTarefas, ctlCategorias, ctlRotulos, lista, stopWords);
             MenuRotulos menuRotulos = new MenuRotulos(ctlRotulos, ctlTarefas);
             MenuStopWords menuStopWords = new MenuStopWords(stopWords);
-
-            Scanner scanner = new Scanner(System.in, "UTF-8");
+            MenuBackups menuBackups = new MenuBackups(scanner, ".\\dados", ".\\backup");
 
             int opcao;
             do {
@@ -35,6 +36,7 @@ public class IO {
                 System.out.println("1- Categorias");
                 System.out.println("2- Tarefas");
                 System.out.println("3- Rotulos");
+                System.out.println("4- Backup");
                 System.out.println("0- Encerrar");
                 System.out.print("Escolha uma opcao: ");
                 opcao = scanner.nextInt();
@@ -51,6 +53,9 @@ public class IO {
                         menuRotulos.menu();
                         break;
                     case 4:
+                        menuBackups.menu();
+                        break;
+                    case 5:
                         menuStopWords.menu();
                         break;
                     case 0:
