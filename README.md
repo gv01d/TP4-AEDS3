@@ -38,6 +38,7 @@ Gerencia operações de backup, incluindo armazenamento e recuperação de arqui
   - `restoreBackup(int id)`: Restaura um backup específico.
   - `restoreBackup(String nome)`: Restaura um backup pelo nome do arquivo.
   - `restoreFile(String file, byte[] data)`: Restaura um arquivo a partir dos dados recuperados.
+  - `findPercentage(int id)`: Encontra a taxa de compressão do backup.
 
 
 ---
@@ -57,6 +58,7 @@ Gerencia as opções do menu de backups, permitindo criar, excluir, carregar, li
   - `carregarBackup()`: Carrega um backup selecionado a partir da lista de backups disponíveis.
   - `listarBackups()`: Exibe a lista de backups disponíveis.
   - `refatorar()`: Refatora o gerenciador de backups, removendo backups inválidos.
+  - `calcularTaxaCompressao()`: Encontra a taxa de compressão do backup.
 
 ---
 
