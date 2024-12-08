@@ -54,7 +54,7 @@ public class Backup {
             f.mkdir();
         RandomAccessFile gerenciador = new RandomAccessFile(backupFolder + "\\gerenciadorDeBackup.db", "rw");
         if (gerenciador.length() == 0) {
-            gerenciador.writeInt(0);
+            gerenciador.writeInt(-1);
             gerenciador.writeInt(0);
             gerenciador.writeInt(0);
         }
@@ -184,7 +184,8 @@ public class Backup {
         if (amount > 0) {
             arquivoTemp.writeInt(id);
         } else {
-            arquivoTemp.writeInt(0);
+            this.id = -1;
+            arquivoTemp.writeInt(-1);
         }
     
         int maxAmount = arquivo.readInt();
@@ -272,6 +273,7 @@ public class Backup {
     // Backup files to a file and update the manager
 
     public void backupFiles() throws Exception {
+        id++;
         // -------------------------------------
         // Load files to *byte array*
         data.clear();
@@ -291,7 +293,7 @@ public class Backup {
         // -------------------------------------
         // Create header for backup file
         // < id, data, amount >
-        arquivo.writeInt(++id);
+        arquivo.writeInt(id);
         arquivo.writeInt((int) dataCriacao.toEpochDay());
         arquivo.writeInt(files.size());
 
