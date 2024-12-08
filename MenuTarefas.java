@@ -546,13 +546,18 @@ public class MenuTarefas {
         System.out.print("\nOpçao: ");
 
         int escolhaRotulo = scanner.nextInt();
+        ArrayList<Integer> escolha = new ArrayList<Integer>();
         while (escolhaRotulo != 0) {
             if (escolhaRotulo > rotulos.size() || escolhaRotulo < 0) {
                 System.out.println("Opcao invalida.");
-            } else {
+            } else if (escolha.contains(escolhaRotulo) ) {
+                System.out.println("Rotulo ja escolhido. ( 0 ) para sair.");
+            }
+            else {
                 idRotulos.add(rotulos.get(escolhaRotulo - 1).getId());
             }
             escolhaRotulo = scanner.nextInt();
+            escolha.add(escolhaRotulo);
         }
         scanner.nextLine();
 
