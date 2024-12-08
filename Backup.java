@@ -13,7 +13,7 @@ import aed3.LZW;
 
 public class Backup {
     int id;
-    int amountOfBackupFiles;
+
     LocalDate dataCriacao;
     ArrayList<String> files;
     ArrayList<byte[]> data;
@@ -54,12 +54,12 @@ public class Backup {
             f.mkdir();
         RandomAccessFile gerenciador = new RandomAccessFile(backupFolder + "\\gerenciadorDeBackup.db", "rw");
         if (gerenciador.length() == 0) {
-            gerenciador.writeInt(-1);
+            gerenciador.writeInt(0);
+            gerenciador.writeInt(0);
             gerenciador.writeInt(0);
         }
         gerenciador.seek(0);
         this.id = gerenciador.readInt();
-        this.amountOfBackupFiles = gerenciador.readInt();
         gerenciador.close();
     }
 
@@ -129,9 +129,10 @@ public class Backup {
         RandomAccessFile arquivo = new RandomAccessFile(backupFolder + "\\gerenciadorDeBackup.db", "rw");
         arquivo.seek(4);
         int amount = arquivo.readInt();
+        int maxAmount = arquivo.readInt();
         int id;
         byte lapide;
-        for (int i = 0; i < amount; i++) {
+        for (int i = 0; i < maxAmount; i++) {
             lapide = arquivo.readByte();
             id = arquivo.readInt();
             if (lapide == ' ') {
@@ -150,19 +151,23 @@ public class Backup {
         RandomAccessFile arquivo = new RandomAccessFile(backupFolder + "\\gerenciadorDeBackup.db", "rw");
         arquivo.seek(4);
         int amount = arquivo.readInt();
+        int maxAmount = arquivo.readInt();
         int idBackup;
         byte lapide;
-        for (int i = 0; i < amount; i++) {
+        for (int i = 0; i < maxAmount; i++) {
             lapide = arquivo.readByte();
             idBackup = arquivo.readInt();
             if (idBackup == id && lapide == ' ') {
                 arquivo.seek(arquivo.getFilePointer() - 5);
                 arquivo.writeByte('*');
+                arquivo.seek(4);
+                arquivo.writeInt(--amount);
                 break;
             } else {
                 arquivo.skipBytes(4);
                 arquivo.readUTF();
             }
+            
         }
         arquivo.close();
     }
@@ -170,35 +175,60 @@ public class Backup {
     public void refactor() throws Exception {
         RandomAccessFile arquivo = new RandomAccessFile(backupFolder + "\\gerenciadorDeBackup.db", "rw");
         RandomAccessFile arquivoTemp = new RandomAccessFile(backupFolder + "\\gerenciadorDeBackupTemp.db", "rw");
-        arquivoTemp.writeInt(arquivo.readInt());
+    
+        File f;
+        int id = arquivo.readInt();
         int amount = arquivo.readInt();
+        System.out.println(amount);
+    
+        if (amount > 0) {
+            arquivoTemp.writeInt(id);
+        } else {
+            arquivoTemp.writeInt(0);
+        }
+    
+        int maxAmount = arquivo.readInt();
         arquivoTemp.writeInt(amount);
-        int idBackup;
-        byte lapide;
-        for (int i = 0; i < amount; i++) {
-            lapide = arquivo.readByte();
-            idBackup = arquivo.readInt();
+        arquivoTemp.writeInt(maxAmount); // Corrigir duplicação
+    
+        for (int i = 0; i < maxAmount; i++) {
+            byte lapide = arquivo.readByte();
+            int idBackup = arquivo.readInt();
+    
             if (lapide == ' ') {
-                // Transfer alive data to new file
-                arquivoTemp.writeByte(' '); // lapide
-                arquivoTemp.writeInt(idBackup); // id
-                arquivoTemp.writeInt(arquivo.readInt()); // data
-                arquivoTemp.writeUTF(arquivo.readUTF()); // file
+                System.out.println("não é lápide");
+                arquivoTemp.writeByte(' ');
+                arquivoTemp.writeInt(idBackup);
+                arquivoTemp.writeInt(arquivo.readInt());
+                arquivoTemp.writeUTF(arquivo.readUTF());
             } else {
+                System.out.println("lápide");
                 arquivo.skipBytes(4);
-                arquivo.readUTF();
+                String name = arquivo.readUTF();
+                f = new File(name);
+                f.delete();
             }
         }
+    
+        // Copiar os dados do arquivo temporário de volta para o arquivo original
+        arquivo.seek(0);
+        arquivoTemp.seek(0);
+        byte[] data = new byte[(int) arquivoTemp.length()];
+        arquivoTemp.readFully(data);
+        arquivo.setLength(data.length); // Ajusta o tamanho
+        arquivo.write(data);
+    
+        arquivo.seek(8);
+        arquivo.writeInt(amount);
+        // Fechar os arquivos
         arquivo.close();
         arquivoTemp.close();
-
-        // rename files
-        File f = new File(backupFolder + "\\gerenciadorDeBackup.db");
-        f.delete();
-        f = new File(backupFolder + "\\gerenciadorDeBackupTemp.db");
-        f.renameTo(new File(backupFolder + "\\gerenciadorDeBackup.db"));
+    
+        // Excluir arquivo temporário
+        File tempFile = new File(backupFolder + "\\gerenciadorDeBackupTemp.db");
+        tempFile.delete();
     }
-
+    
     // ---------------------------------------------------------------------------------------------------------------------------
 
     public byte[] toByteArray() throws IOException {
@@ -244,6 +274,7 @@ public class Backup {
     public void backupFiles() throws Exception {
         // -------------------------------------
         // Load files to *byte array*
+        data.clear();
         for (String file : files) {
             byte[] fileData = loadFile(file);
             data.add(fileData);
@@ -252,9 +283,9 @@ public class Backup {
         // -------------------------------------
         // Open backup file
         dataCriacao = LocalDate.now();
-        String nomeDoArquivo = backupFolder + "\\" + id + "." + dataCriacao.getDayOfMonth() + "/"
+        String nomeDoArquivo = backupFolder + "\\" + id + "." + dataCriacao.getDayOfMonth() + "-"
                 + dataCriacao.getMonthValue()
-                + "/" + dataCriacao.getYear() + ".db";
+                + "-" + dataCriacao.getYear() + ".db";
         RandomAccessFile arquivo = new RandomAccessFile(nomeDoArquivo, "rw");
 
         // -------------------------------------
@@ -285,9 +316,14 @@ public class Backup {
         arquivo = new RandomAccessFile(backupFolder + "\\gerenciadorDeBackup.db", "rw");
 
         // header < id, amount >
+
         arquivo.seek(0);
         arquivo.writeInt(id);
-        arquivo.writeInt(++amountOfBackupFiles);
+        int amount = arquivo.readInt();
+        int maxAmount = arquivo.readInt();
+        arquivo.seek(4);
+        arquivo.writeInt(++amount);
+        arquivo.writeInt(++maxAmount);
 
         // backup < id, data, file name >
         arquivo.seek(arquivo.length());
@@ -321,8 +357,8 @@ public class Backup {
         RandomAccessFile arquivo = new RandomAccessFile(backupFolder + "\\gerenciadorDeBackup.db", "rw");
 
         // < id, amount >
-        arquivo.seek(4);
-        int amount = arquivo.readInt();
+        arquivo.seek(8);
+        int maxAmount = arquivo.readInt();
 
         // -------------------------------------
         // search for the backup
@@ -330,7 +366,7 @@ public class Backup {
         byte lapide;
         int idBackup;
         String temp;
-        for (int i = 0; i < amount; i++) {
+        for (int i = 0; i < maxAmount; i++) {
             lapide = arquivo.readByte();
             idBackup = arquivo.readInt();
             arquivo.skipBytes(4);
@@ -368,6 +404,8 @@ public class Backup {
         DataInputStream dis = new DataInputStream(bais);
 
         //
+        files.clear();
+        data.clear();
         for (int i = 0; i < amount; i++) {
             files.add(dis.readUTF());
             int sizeFile = dis.readInt();

@@ -28,6 +28,8 @@ public class MenuBackups {
             System.out.println("1- Criar Backup");
             System.out.println("2- Excluir Backup");
             System.out.println("3- Carregar Backup");
+            System.out.println("4- Listar Backups");
+            System.out.println("5- Refatorar Backups");
             System.out.println("0- Voltar");
             System.out.print("\nEscolha uma opcao: ");
             opcao = scanner.nextInt();
@@ -128,10 +130,15 @@ public class MenuBackups {
 
     public void listarBackups() throws Exception {
         HashMap<Integer, String> list = backup.listBackups();
-        System.out.println("Backups disponiveis: ");
-        int i = 1;
-        for (String k : list.values()) {
-            System.out.println("\t" + i + ") " + k);
+        if (list.isEmpty()) {
+            System.out.println("\n<> Nenhum backup disponivel.");
+        }else{
+            System.out.println("Backups disponiveis: ");
+            int i = 1;
+            for (String k : list.values()) {
+                System.out.println("\t" + i + ") " + k);
+                i++;
+            }
         }
         System.out.println();
     }
