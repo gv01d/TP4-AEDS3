@@ -30,6 +30,7 @@ public class MenuBackups {
             System.out.println("3- Carregar Backup");
             System.out.println("4- Listar Backups");
             System.out.println("5- Refatorar Backups");
+            System.out.println("6- Calcular taxa de compressão");
             System.out.println("0- Voltar");
             System.out.print("\nEscolha uma opcao: ");
             opcao = scanner.nextInt();
@@ -50,6 +51,9 @@ public class MenuBackups {
                     break;
                 case 5:
                     refatorar();
+                    break;
+                case 6:
+                    calcularTaxaCompressao();
                     break;
                 case 0:
                     System.out.println("Saindo...");
@@ -146,6 +150,25 @@ public class MenuBackups {
     public void refatorar() throws Exception {
         backup.refactor();
         System.out.println("<> Dados refatorados com sucesso.");
+    }
+
+    public void calcularTaxaCompressao() throws Exception {
+        // listar todos backups
+        HashMap<Integer, String> list = backup.listBackups();
+        if (list.isEmpty()) {
+            System.out.println("\n<> Nenhum backup disponivel.");
+            return;
+        }
+        System.out.println("Backups disponiveis: ");
+        int i = 1;
+        for (String k : list.values()) {
+            System.out.println("\t" + i + ") " + k);
+            i++;
+        }
+        System.out.println("\nDigite o id do backup: ");
+        int id = scanner.nextInt();
+        float percentage = backup.findPercentage(id-1);
+        System.out.println("\n<> Taxa de compressão: " + percentage + "%");
     }
 
 }

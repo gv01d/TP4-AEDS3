@@ -88,11 +88,47 @@ public class Backup {
         else {
             String[] files = f.list();
             if (files != null) {
+                this.files.clear();
                 for (String file : files) {
                     this.files.add(folder + "\\" + file);
                 }
             }
         }
+    }
+
+    public float findPercentage(int id) throws Exception {
+        float total = 0;
+        setFilesFromFolder(".\\dados");
+        for (String file : files) {
+            total += new File(file).length();
+        }
+        RandomAccessFile arquivo = new RandomAccessFile(backupFolder + "\\gerenciadorDeBackup.db", "rw");
+        arquivo.seek(4);
+        int amount = arquivo.readInt();
+        int maxAmount = arquivo.readInt();
+        int idBackup;
+        byte lapide;
+        File f = null;
+        for (int i = 0; i < maxAmount; i++) {
+            lapide = arquivo.readByte();
+            idBackup = arquivo.readInt();
+            if (idBackup == id && lapide == ' ') {
+                arquivo.skipBytes(4);
+                f = new File(arquivo.readUTF());
+                break;
+            } else {
+                arquivo.skipBytes(4);
+                arquivo.readUTF();
+            }
+            
+        }
+        arquivo.close();
+        if (f == null) {
+            return -1;
+        }
+        System.out.println("Total: " + total);
+        System.out.println("Backup: " + f.length());
+        return (f.length() / total) * 100;
     }
 
     public Backup(String folder, String backupFolder) throws Exception {
