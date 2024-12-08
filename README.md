@@ -77,7 +77,7 @@ Classe principal utilizada para testar a funcionalidade do projeto. Possui o Men
 - Há uma rotina de compactação usando o algoritmo LZW para fazer backup dos arquivos? **Sim.**
 - Há uma rotina de descompactação usando o algoritmo LZW para recuperação dos arquivos? **Sim.**
 - O usuário pode escolher a versão a recuperar? **Sim.**
-- Qual foi a taxa de compressão alcançada por esse backup? (Compare o tamanho dos arquivos compactados com os arquivos originais) **55%.**
+- Qual foi a taxa de compressão alcançada por esse backup? (Compare o tamanho dos arquivos compactados com os arquivos originais) **57.46993%**
 - O trabalho está funcionando corretamente? **Sim.**
 - O trabalho está completo? **Sim.**
 - O trabalho é original e não a cópia de um trabalho de um colega? **Sim.**
